@@ -17,8 +17,19 @@ export default function Navigation() {
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
 
   useEffect(() => {
-    setIsCollapsed((prev) => !prev);
+    if (isMobile) {
+      collapse();
+    } else {
+      resetWidth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) {
+      collapse();
+    }
+  }, [pathname, isMobile]);
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -72,6 +83,21 @@ export default function Navigation() {
     }
   };
 
+  const collapse = () => {
+    if (sidebarRef.current && navbarRef.current) {
+      setIsCollapsed(true);
+      setIsResetting(true);
+
+      sidebarRef.current.style.width = "0";
+      navbarRef.current.style.setProperty("width", "100%");
+      navbarRef.current.style.setProperty("left", "0");
+
+      setTimeout(() => {
+        setIsResetting(false);
+      }, 300);
+    }
+  };
+
   return (
     <>
       <aside
@@ -82,7 +108,7 @@ export default function Navigation() {
           isMobile && "w-0"
         )}
       >
-        <div role='button'>
+        <div role='button' onClick={collapse}>
           <ChevronsLeft
             className={cn(
               "absolute right-3 top-3 h-6 w-6 rounded-sm text-muted-foreground opacity-0 transition hover:bg-neutral-300  group-hover/sidebar:opacity-100 dark:hover:bg-neutral-600",
@@ -114,7 +140,11 @@ export default function Navigation() {
       >
         <nav className='w-full bg-transparent px-3 py-2'>
           {isCollapsed && (
-            <MenuIcon role='button' className='h-6 w-6 text-muted-foreground' />
+            <MenuIcon
+              role='button'
+              onClick={resetWidth}
+              className='h-6 w-6 text-muted-foreground'
+            />
           )}
         </nav>
       </div>
