@@ -5,18 +5,21 @@ import { useMediaQuery } from "usehooks-ts";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import UserItem from "./user-item";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Navigation() {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
   const navbarRef = useRef<ElementRef<"div">>(null);
 
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
+
+  const documents = useQuery(api.documents.get);
 
   useEffect(() => {
     if (isMobile) {
@@ -123,6 +126,7 @@ export default function Navigation() {
         </div>
         <div className='mt-4'>
           <p>Documents</p>
+          {documents?.map((item) => <p key={item._id}>{item.title}</p>)}
         </div>
         <div
           onMouseDown={handleMouseDown}
