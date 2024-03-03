@@ -125,7 +125,7 @@ export default function Navigation() {
           <UserItem />
         </div>
         <div className='mt-4'>
-          <p>Documents</p>
+          <p>List of Documents</p>
           {documents?.map((item) => <p key={item._id}>{item.title}</p>)}
         </div>
         <div
