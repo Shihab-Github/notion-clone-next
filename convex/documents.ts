@@ -33,12 +33,12 @@ export const get = query({
         const identity = await ctx.auth.getUserIdentity()
 
         if(!identity){
-            throw new Error("Not Authenticated")
+            throw new Error("Not Authenticated");
         }
 
-        const documents = await ctx.db.query("documents").collect()
+        const documents = await ctx.db.query("documents").collect();
 
-        return documents
+        return documents;
 
     }
 })
