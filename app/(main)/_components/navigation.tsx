@@ -15,6 +15,7 @@ import UserItem from "./user-item";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Item from "./item";
+import DocumentList from "./document-list";
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -144,7 +145,9 @@ export default function Navigation() {
           <Item label='Settings' icon={Settings} onClick={() => {}} />
           <Item onClick={handleCreate} label='New Page' icon={PlusCircle} />
         </div>
-        <div className='mt-4'></div>
+        <div className='mt-4'>
+          <DocumentList />
+        </div>
         <div
           onMouseDown={handleMouseDown}
           onClick={resetWidth}
