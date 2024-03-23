@@ -55,6 +55,7 @@ export default function Item({
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
 
   const create = useMutation(api.documents.create);
+  const archive = useMutation(api.documents.archive);
 
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -81,6 +82,19 @@ export default function Item({
       loading: "Creating a new note...",
       success: "New note created",
       error: "Failed to create a new note",
+    });
+  };
+
+  const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (!id) return;
+
+    const promise = archive({ id });
+
+    toast.promise(promise, {
+      loading: "Deleting document...",
+      success: "Document deleted",
+      error: "Failed to delete document",
     });
   };
 
@@ -132,7 +146,7 @@ export default function Item({
               side='right'
               forceMount
             >
-              <DropdownMenuItem onClick={() => {}}>
+              <DropdownMenuItem onClick={onArchive}>
                 <Trash className='mr-2 h-4 w-4' />
                 Delete
               </DropdownMenuItem>

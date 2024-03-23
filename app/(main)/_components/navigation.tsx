@@ -3,10 +3,16 @@ import { ElementRef, useEffect, useRef, useState } from "react";
 import {
   ChevronsLeft,
   MenuIcon,
+  Plus,
   PlusCircle,
   Search,
   Settings,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useMediaQuery } from "usehooks-ts";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -147,6 +153,7 @@ export default function Navigation() {
         </div>
         <div className='mt-4'>
           <DocumentList />
+          <Item onClick={handleCreate} label='Add a page' icon={Plus} />
         </div>
         <div
           onMouseDown={handleMouseDown}
