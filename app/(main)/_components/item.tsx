@@ -9,11 +9,21 @@ import {
   ChevronDown,
   ChevronRight,
   LucideIcon,
+  MoreHorizontal,
   Plus,
   PlusIcon,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useUser } from "@clerk/clerk-react";
 
 interface ItemProps {
   id?: Id<"documents">;
@@ -40,6 +50,7 @@ export default function Item({
   onClick,
   icon: Icon,
 }: ItemProps) {
+  const { user } = useUser();
   const router = useRouter();
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
 
@@ -106,6 +117,31 @@ export default function Item({
       )}
       {id && (
         <div className='ml-auto flex items-center gap-x-2'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <div
+                role='button'
+                className='ml-auto h-full rounded-sm opacity-0 hover:bg-neutral-300 group-hover:opacity-100 dark:bg-neutral-600 '
+              >
+                <MoreHorizontal className='h-4 w-4 text-muted-foreground' />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className='w-60'
+              align='start'
+              side='right'
+              forceMount
+            >
+              <DropdownMenuItem onClick={() => {}}>
+                <Trash className='mr-2 h-4 w-4' />
+                Delete
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <div className='p-2 text-xs text-muted-foreground'>
+                Last edited by: {user?.fullName}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div
             role='button'
             onClick={onCreate}

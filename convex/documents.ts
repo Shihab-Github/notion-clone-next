@@ -2,6 +2,58 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
 
+export const archive = mutation({
+    args: {
+        id: v.id('documents')
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if(!identity) {
+            throw new Error("Not Authenticated")
+        }
+
+        const userId = identity.subject;
+        const existingDocument = await ctx.db.get(args.id)
+
+        if(!existingDocument) {
+            throw new Error("Document not found")
+        }
+
+        if(existingDocument.userId !== userId) {
+            throw new Error("You are not authorized")
+        }
+
+        const removeChildDocuments = async (documentId: Id<"documents">) => {
+            const childDocuments = await ctx.db.
+            query('documents')
+            .withIndex("by_user_parent", q => {
+                return q.eq("userId", userId)
+                        .eq('parentDocument', documentId)
+            })
+            .collect()
+
+            for (let i = 0; i < childDocuments.length; i++) {
+                const item = childDocuments[i];
+                await ctx.db.patch(item._id, {
+                    isArchived: true
+                })
+
+                removeChildDocuments(item._id)
+            }
+        }
+
+        const document = await ctx.db.patch(args.id, {
+            isArchived: true
+        })
+
+        removeChildDocuments(args.id)
+
+        return document
+        
+    },
+})
+
 export const create = mutation({
     args: {
         title: v.string(),
