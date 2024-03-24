@@ -7,6 +7,7 @@ import {
   PlusCircle,
   Search,
   Settings,
+  Trash,
 } from "lucide-react";
 import {
   Popover,
@@ -154,6 +155,17 @@ export default function Navigation() {
         <div className='mt-4'>
           <DocumentList />
           <Item onClick={handleCreate} label='Add a page' icon={Plus} />
+          <Popover>
+            <PopoverTrigger className='mt-4 w-full'>
+              <Item icon={Trash} label='Trash' />
+            </PopoverTrigger>
+            <PopoverContent
+              className='w-72 p-0'
+              side={isMobile ? "bottom" : "right"}
+            >
+              <p>Trash Box</p>
+            </PopoverContent>
+          </Popover>
         </div>
         <div
           onMouseDown={handleMouseDown}
