@@ -55,6 +55,32 @@ export const archive = mutation({
     },
 })
 
+export const remove = mutation({
+    args: {
+        id: v.id('documents')
+    },
+    handler: async (ctx,args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if(!identity) {
+            throw new Error("Not Authenticated")
+        }
+
+        const userId = identity.subject;
+
+        const existingDocument = await ctx.db.get(args.id)
+
+        if(!existingDocument) {
+            throw new Error("Document do not exist")
+        }
+
+        if(existingDocument.userId !== userId) {
+            throw new Error("Unauthorized")
+        }
+
+    }
+})
+
 export const create = mutation({
     args: {
         title: v.string(),
@@ -78,21 +104,6 @@ export const create = mutation({
         })
 
         return document;
-    }
-})
-
-export const get = query({
-    handler: async (ctx) => {
-        const identity = await ctx.auth.getUserIdentity()
-
-        if(!identity){
-            throw new Error("Not Authenticated");
-        }
-
-        const documents = await ctx.db.query("documents").collect();
-
-        return documents;
-
     }
 })
 
@@ -153,6 +164,20 @@ export const restoreDocument = mutation({
 
         const existingDocument = await ctx.db.get(args.id)
 
+        const restoreChildDocuments = async (documentId: Id<"documents">) => {
+            const childDocs = await ctx.db.query('documents')
+                                    .withIndex('by_user_parent', (q) => (
+                                        q.eq("userId", userId).eq('parentDocument', documentId)
+                                    )).collect();
+
+            for (let i = 0; i < childDocs.length; i++) {
+                const item = childDocs[i];
+                await ctx.db.patch(item._id, {isArchived: false})
+
+                restoreChildDocuments(item._id)
+            }
+        }
+
         if(!existingDocument) {
             throw new Error("Document not found")
         }
@@ -161,13 +186,20 @@ export const restoreDocument = mutation({
             throw new Error("Unauthorized")
         }
 
-        const options: Partial<Doc<"documents">> = {
-            isArchived: false
+       
+        if(existingDocument.parentDocument) {
+            const parent = await ctx.db.get(existingDocument.parentDocument)
+            if(parent && parent.isArchived) {
+                parent.isArchived = false
+            }
         }
 
-        if(existingDocument.parentDocument) {
-            
-        }
+        await ctx.db.patch(args.id, {isArchived: false})
+
+
+        restoreChildDocuments(args.id)
+      
+        return existingDocument
 
     }
 })
