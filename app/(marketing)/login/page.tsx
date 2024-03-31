@@ -1,5 +1,7 @@
-import Link from "next/link";
+"use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +12,36 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/data-layer/users";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const signIn = () => {
+    const data = {
+      email,
+      password,
+    };
+
+    const promise = login(data).then((res) => {
+      localStorage.setItem("access_token", res.data.access_token);
+      router.push("/documents");
+    });
+
+    toast.promise(promise, {
+      loading: "Authenticating...",
+      error: (err) => {
+        let errorMsg = err.response?.data?.message;
+        if (!errorMsg) errorMsg = "Failed to create user";
+        return errorMsg;
+      },
+    });
+  };
+
   return (
     <Card className='mx-auto max-w-sm'>
       <CardHeader>
@@ -27,7 +57,8 @@ export default function Register() {
             <Input
               id='email'
               type='email'
-              placeholder='m@example.com'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -38,14 +69,20 @@ export default function Register() {
                 Forgot your password?
               </Link>
             </div>
-            <Input id='password' type='password' required />
+            <Input
+              id='password'
+              type='password'
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
-          <Button type='submit' className='w-full'>
+          <Button type='submit' className='w-full' onClick={signIn}>
             Login
           </Button>
-          <Button variant='outline' className='w-full'>
+          {/* <Button variant='outline' className='w-full'>
             Login with Google
-          </Button>
+          </Button> */}
         </div>
         <div className='mt-4 text-center text-sm'>
           Don&apos;t have an account?{" "}

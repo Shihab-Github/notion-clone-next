@@ -10,10 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { register } from "@/data-layer/users";
 
 export default function Register() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,10 +25,25 @@ export default function Register() {
 
   const signUp = () => {
     const data = {
+      firstName,
+      lastName,
       email,
       password,
     };
-    console.log("data: ", data);
+
+    const promise = register(data).then((data) => {
+      router.push("/login");
+    });
+    
+    toast.promise(promise, {
+      loading: "Creating a new user...",
+      success: "User created",
+      error: (err) => {
+        let errorMsg = err.response?.data?.message[0];
+        if (!errorMsg) errorMsg = "Failed to create user";
+        return err.response.data.message[0];
+      },
+    });
   };
 
   return (
@@ -62,7 +81,6 @@ export default function Register() {
             <Input
               id='email'
               type='email'
-              placeholder='m@example.com'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
