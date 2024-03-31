@@ -5,13 +5,14 @@ import React from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { redirect } from "next/navigation";
 import Navigation from "./_components/navigation";
+import useAuth from "@/hooks/useAuth";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
