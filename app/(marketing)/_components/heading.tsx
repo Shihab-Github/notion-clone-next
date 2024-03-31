@@ -5,10 +5,14 @@ import { useConvexAuth } from "convex/react";
 import { ArrowRight } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
-import { SignInButton } from "@clerk/clerk-react";
-
+import { useRouter } from "next/navigation";
 export const Heading = () => {
+  const router = useRouter();
   const { isAuthenticated, isLoading } = useConvexAuth();
+
+  const navigate = () => {
+    router.push("/login");
+  };
 
   return (
     <div className='max-w-3xl space-y-4'>
@@ -32,11 +36,9 @@ export const Heading = () => {
         </Button>
       )}
       {!isAuthenticated && !isLoading && (
-        <SignInButton mode='modal'>
-          <Button>
-            Get Jotion Free <ArrowRight className='ml-2 h-4 w-4' />
-          </Button>
-        </SignInButton>
+        <Button onClick={navigate}>
+          Get Jotion Free <ArrowRight className='ml-2 h-4 w-4' />
+        </Button>
       )}
     </div>
   );
