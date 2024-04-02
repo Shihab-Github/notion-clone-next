@@ -6,9 +6,11 @@ import { ArrowRight } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
 export const Heading = () => {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  const { isAuthenticated, isLoading } = useAuth();
 
   const navigate = () => {
     router.push("/login");

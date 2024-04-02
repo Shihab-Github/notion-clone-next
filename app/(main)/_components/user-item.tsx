@@ -1,6 +1,6 @@
 "use client";
 
-import { SignOutButton, useUser } from "@clerk/clerk-react";
+import { SignOutButton } from "@clerk/clerk-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { ChevronsLeftRight } from "lucide-react";
 import {
@@ -11,9 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useUser from "@/hooks/useUser";
 
 export default function UserItem() {
-  const { user } = useUser();
+  const { userInfo } = useUser();
 
   return (
     <DropdownMenu>
@@ -24,10 +25,10 @@ export default function UserItem() {
         >
           <div className='flex max-w-[150px] items-center gap-x-2'>
             <Avatar className='h-5 w-5'>
-              <AvatarImage src={user?.imageUrl} />
+              <AvatarImage src='https://i.pinimg.com/originals/31/b2/3b/31b23ba6a051a0abc69c7c65a0a26552.jpg' />
             </Avatar>
             <span className='line-clamp-1 text-start font-medium'>
-              {user?.fullName}
+              {userInfo.firstName} {userInfo.lastName}
             </span>
           </div>
           <ChevronsLeftRight className='ml-2 h-4 w-4 rotate-90 text-muted-foreground' />
@@ -36,16 +37,16 @@ export default function UserItem() {
       <DropdownMenuContent className='w-60' align='start' forceMount>
         <div className='flex flex-col space-y-4 p-2'>
           <p className='text-xs font-medium leading-none text-muted-foreground'>
-            {user?.emailAddresses[0].emailAddress}
+            {userInfo?.email}
           </p>
           <div className='flex items-center gap-x-2'>
             <div className='p-1'>
               <Avatar className='h-8 w-8'>
-                <AvatarImage src={user?.imageUrl} />
+                <AvatarImage src='https://i.pinimg.com/originals/31/b2/3b/31b23ba6a051a0abc69c7c65a0a26552.jpg' />
               </Avatar>
             </div>
             <div className='space-y-1'>
-              <p className='line-clamp-1 text-sm'>{user?.fullName}</p>
+              <p className='line-clamp-1 text-sm'>{`${userInfo.firstName} ${userInfo.lastName}`}</p>
             </div>
           </div>
         </div>

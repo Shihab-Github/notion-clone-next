@@ -2,7 +2,6 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import {
@@ -26,7 +25,7 @@ import {
 import { useUser } from "@clerk/clerk-react";
 
 interface ItemProps {
-  id?: Id<"documents">;
+  id?: string;
   documentIcon?: string;
   active?: Boolean;
   expanded?: Boolean;

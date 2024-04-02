@@ -1,16 +1,16 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useQuery } from "@tanstack/react-query";
+import { Doc } from "@/convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Item from "./item";
 import { cn } from "@/lib/utils";
 import { FileIcon } from "lucide-react";
+import { getDocuments } from "@/data-layer/users";
 
 interface DocumentListProps {
-  parentDocumentId?: Id<"documents">;
+  parentDocumentId?: string;
   level?: number;
   data?: Doc<"documents">[];
 }
@@ -23,9 +23,24 @@ export default function DocumentList({
   const router = useRouter();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const documents = useQuery(api.documents.getSidebar, {
-    parentDocument: parentDocumentId,
+  // const [isLoading, documents] = useDocuments(parentDocumentId as string);
+
+  const {
+    isLoading,
+    isError,
+    data: documents,
+  } = useQuery({
+    queryKey: ["documentsData"],
+    queryFn: () => {
+      return getDocuments(parentDocumentId as string).then((data) => {
+        return data;
+      });
+    },
   });
+
+  // const documents = useQuery(api.documents.getSidebar, {
+  //   parentDocument: parentDocumentId,
+  // });
 
   const onRedirect = (documentId: string) => {
     router.push("/documents/" + documentId);
@@ -38,7 +53,7 @@ export default function DocumentList({
     }));
   };
 
-  if (documents === undefined) {
+  if (documents?.length === 0) {
     return (
       <>
         <Item.Skeleton level={level} />
@@ -66,14 +81,14 @@ export default function DocumentList({
       >
         No Pages Available
       </p>
-      {documents.map((document) => (
+      {documents?.map((document) => (
         <div key={document._id}>
           <Item
             id={document._id}
             label={document.title}
             onClick={() => onRedirect(document._id)}
             icon={FileIcon}
-            documentIcon={document.icon}
+            // documentIcon={document.icon}
             active={params.documentId === document._id}
             level={level}
             onExpand={() => onExpand(document._id)}

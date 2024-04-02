@@ -1,26 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useUser } from "@clerk/clerk-react";
+import useUser from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
-import { Plus, PlusCircle } from "lucide-react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createDocument } from "@/data-layer/documents";
+import { CreateDocument } from "@/interface/Document";
 
 export default function DocumentsPage() {
-  const { isSignedIn, user, isLoaded } = useUser();
-  const create = useMutation(api.documents.create);
+  const queryClient = useQueryClient();
+  const { userInfo } = useUser();
 
-  const onCreate = () => {
-    const promise = create({ title: "Untitled" });
-
-    toast.promise(promise, {
-      loading: "Creating a new note",
-      success: "Successfully created a new note",
-      error: "Failed to create a note",
-    });
-  };
+  const newDocumentMutation = useMutation({
+    mutationFn: (data: CreateDocument) => {
+      return createDocument(data).then((res) => {
+        console.log("data: ", res);
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documentsData"] });
+    },
+  });
 
   return (
     <div className='flex h-full flex-col items-center justify-center'>
@@ -39,12 +41,19 @@ export default function DocumentsPage() {
         alt='empty'
       />
 
-      {isLoaded && (
-        <h2 className='mb-2 text-lg font-medium'>
-          Welcome to {user?.firstName}&apos;s Jotion
-        </h2>
-      )}
-      <Button onClick={onCreate}>
+      <h2 className='mb-2 text-lg font-medium'>
+        Welcome to {userInfo.firstName}&apos;s Jotion
+      </h2>
+
+      <Button
+        disabled={newDocumentMutation.isPending}
+        onClick={() =>
+          newDocumentMutation.mutate({
+            title: "Rise of the ronin",
+            parentDocumentId: null,
+          })
+        }
+      >
         <PlusCircle className='mr-2 h-4 w-4' />
         Create a note
       </Button>
