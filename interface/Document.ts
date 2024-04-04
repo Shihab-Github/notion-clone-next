@@ -14,3 +14,10 @@ export interface CreateDocument {
     title: string;
     parentDocumentId: string | null;
 }
+
+export interface PatchDocument {
+    _id: string;
+    isArchived?: Boolean;
+    published?: Boolean;
+    title?: string;
+}

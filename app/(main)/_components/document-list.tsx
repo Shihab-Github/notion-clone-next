@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,28 +19,19 @@ export default function DocumentList({
   parentDocumentId,
   level = 0,
 }: DocumentListProps) {
+  const queryClient = useQueryClient();
   const params = useParams();
   const router = useRouter();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  // const [isLoading, documents] = useDocuments(parentDocumentId as string);
-
-  const {
-    isLoading,
-    isError,
-    data: documents,
-  } = useQuery({
-    queryKey: ["documentsData"],
+  const { isLoading, data: documents } = useQuery({
+    queryKey: ["documentsData", parentDocumentId],
     queryFn: () => {
       return getDocuments(parentDocumentId as string).then((data) => {
         return data;
       });
     },
   });
-
-  // const documents = useQuery(api.documents.getSidebar, {
-  //   parentDocument: parentDocumentId,
-  // });
 
   const onRedirect = (documentId: string) => {
     router.push("/documents/" + documentId);
@@ -51,9 +42,11 @@ export default function DocumentList({
       ...prevExpanded,
       [documentId]: !prevExpanded[documentId],
     }));
+    console.log("expanded: ", expanded);
+    queryClient.invalidateQueries({ queryKey: ["documentsData"] });
   };
 
-  if (documents?.length === 0) {
+  if (isLoading) {
     return (
       <>
         <Item.Skeleton level={level} />
@@ -69,18 +62,21 @@ export default function DocumentList({
 
   return (
     <>
-      <p
-        style={{
-          paddingLeft: level ? `${level * 12 + 25}px` : undefined,
-        }}
-        className={cn(
-          "hidden text-sm font-medium text-muted-foreground/80",
-          expanded && "last:block",
-          level === 0 && "hidden"
-        )}
-      >
-        No Pages Available
-      </p>
+      {documents?.length === 0 && (
+        <p
+          style={{
+            paddingLeft: level ? `${level * 12 + 25}px` : undefined,
+          }}
+          className={cn(
+            "hidden text-sm font-medium text-muted-foreground/80",
+            expanded && "last:block",
+            level === 0 && "hidden"
+          )}
+        >
+          No Pages Available
+        </p>
+      )}
+
       {documents?.map((document) => (
         <div key={document._id}>
           <Item

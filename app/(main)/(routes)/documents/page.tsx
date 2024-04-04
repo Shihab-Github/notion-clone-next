@@ -20,6 +20,7 @@ export default function DocumentsPage() {
       });
     },
     onSuccess: () => {
+      toast.success("Document has been created");
       queryClient.invalidateQueries({ queryKey: ["documentsData"] });
     },
   });
@@ -49,7 +50,7 @@ export default function DocumentsPage() {
         disabled={newDocumentMutation.isPending}
         onClick={() =>
           newDocumentMutation.mutate({
-            title: "Rise of the ronin",
+            title: "Untitled",
             parentDocumentId: null,
           })
         }

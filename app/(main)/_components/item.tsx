@@ -1,9 +1,8 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
-import { useMutation } from "convex/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronRight,
@@ -23,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@clerk/clerk-react";
+import { CreateDocument, PatchDocument } from "@/interface/Document";
+import { createDocument, archiveDocument } from "@/data-layer/documents";
 
 interface ItemProps {
   id?: string;
@@ -49,12 +50,33 @@ export default function Item({
   onClick,
   icon: Icon,
 }: ItemProps) {
+  const queryClient = useQueryClient();
   const { user } = useUser();
   const router = useRouter();
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
 
-  const create = useMutation(api.documents.create);
-  const archive = useMutation(api.documents.archive);
+  const newDocumentMutation = useMutation({
+    mutationFn: (data: CreateDocument) => {
+      return createDocument(data);
+    },
+    onSuccess: () => {
+      toast.success("Document has been created");
+      queryClient.invalidateQueries({ queryKey: ["documentsData"] });
+      if (!expanded) {
+        onExpand?.();
+      }
+    },
+  });
+
+  const archiveDocumentMutation = useMutation({
+    mutationFn: (data: PatchDocument) => {
+      return archiveDocument(data);
+    },
+    onSuccess: () => {
+      toast.success("Document has been deleted");
+      queryClient.invalidateQueries({ queryKey: ["documentsData"] });
+    },
+  });
 
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -65,22 +87,9 @@ export default function Item({
 
   const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
-    if (!id) return;
-
-    const promise = create({ title: "Untitled", parentDocument: id }).then(
-      (documentId: string) => {
-        if (!expanded) {
-          onExpand?.();
-        }
-        console.log("documentId: ", documentId);
-        // router.push("/documents/" + documentId);
-      }
-    );
-
-    toast.promise(promise, {
-      loading: "Creating a new note...",
-      success: "New note created",
-      error: "Failed to create a new note",
+    newDocumentMutation.mutate({
+      title: "Untitled",
+      parentDocumentId: id as string,
     });
   };
 
@@ -88,12 +97,9 @@ export default function Item({
     event.stopPropagation();
     if (!id) return;
 
-    const promise = archive({ id });
-
-    toast.promise(promise, {
-      loading: "Deleting document...",
-      success: "Document deleted",
-      error: "Failed to delete document",
+    archiveDocumentMutation.mutate({
+      _id: id,
+      isArchived: true,
     });
   };
 
