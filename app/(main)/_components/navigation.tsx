@@ -23,11 +23,12 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Item from "./item";
 import DocumentList from "./document-list";
+import { useSearch } from "@/hooks/use-search";
 
 export default function Navigation() {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
-
+  const search = useSearch();
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
   const navbarRef = useRef<ElementRef<"div">>(null);
@@ -148,14 +149,14 @@ export default function Navigation() {
         </div>
         <div>
           <UserItem />
-          <Item label='Search' icon={Search} isSearch onClick={() => {}} />
+          <Item label='Search' icon={Search} isSearch onClick={search.onOpen} />
           <Item label='Settings' icon={Settings} onClick={() => {}} />
           <Item onClick={handleCreate} label='New Page' icon={PlusCircle} />
         </div>
         <div className='mt-4'>
           <DocumentList />
           <Item onClick={handleCreate} label='Add a page' icon={Plus} />
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger className='mt-4 w-full'>
               <Item icon={Trash} label='Trash' />
             </PopoverTrigger>
@@ -165,7 +166,7 @@ export default function Navigation() {
             >
               <p>Trash Box</p>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
         <div
           onMouseDown={handleMouseDown}
